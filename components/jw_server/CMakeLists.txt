@@ -1,5 +1,5 @@
 
-idf_component_register(SRCS "jw_keep_alive.c" "jw_server.c"
+idf_component_register(SRCS "jw_server_ws.c" "jw_server_http.c" "jw_server_core.c" "jw_keep_alive.c"
                        INCLUDE_DIRS "." "html"
                        REQUIRES cJSON esp_http_server jw_common
                        PRIV_REQUIRES cJSON fatfs esp_wifi esp_http_server esp_timer jw_wifi jw_rtc jw_sdcard jw_log jw_espnow jw_peers 
