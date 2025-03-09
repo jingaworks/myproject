@@ -183,7 +183,7 @@ static void send_found_peers_notification(cJSON *peers_array) {
     cJSON *msg = cJSON_CreateObject();
     cJSON_AddStringToObject(msg, "event", "found_peers");
     cJSON_AddItemToObject(msg, "peers", peers_array);
-    jw_server_notify_found_peers(msg);
+    // jw_server_notify_found_peers(msg);
 }
 
 static void jw_espnow_run_peering_task(void *params) {
@@ -241,7 +241,7 @@ static void jw_espnow_run_peering_task(void *params) {
                             send_found_peers_notification(found_peers);
                             found_peers = cJSON_CreateArray();
                             peering_start = 0;
-                            jw_server_unregister_nodes_uri();
+                            // jw_server_unregister_nodes_uri();
                         }
                     }
                     break;
@@ -262,7 +262,7 @@ static void jw_espnow_run_peering_task(void *params) {
                         }
                         else {
                             ESP_LOGI(TAG, "Added peer " MACSTR " to jw_peers", MAC2STR(msg.source_mac));
-                            jw_server_unregister_nodes_uri();
+                            // jw_server_unregister_nodes_uri();
                         }
                     }
                     break;
@@ -286,11 +286,11 @@ static void jw_espnow_run_peering_task(void *params) {
                 cJSON *msg = cJSON_CreateObject();
                 cJSON_AddStringToObject(msg, "event", "peer_failed");
                 cJSON_AddStringToObject(msg, "message", "No peers responded");
-                jw_server_notify_found_peers(msg);
+                // jw_server_notify_found_peers(msg);
             }
             found_peers = cJSON_CreateArray();
             peering_start = 0;
-            jw_server_unregister_nodes_uri();
+            // jw_server_unregister_nodes_uri();
         }
         vTaskDelay(pdMS_TO_TICKS(100));
     }
