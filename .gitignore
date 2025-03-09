@@ -1,7 +1,7 @@
 # Ignore files related to API keys
 .devcontainer
 .vscode
-# docs
+build
 partitions_app.csv
 sdkconfig.defaults
 sdkconfig.old
