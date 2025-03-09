@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>HoME Assistant</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <script>
+      var script = document.createElement('script');
+        if (window.location.hostname === "192.168.4.1") {
+          script.src = 'jquery.js';
+        } else {
+          script.src = 'https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js';
+        }
+        document.head.appendChild(script);
+    </script>
+    <link rel='stylesheet' href='main.css'>
+  </head>
+  <body>
+    <section id="main">
+      <section id="header">
+        <section id="title">
+          <h2>HoME Assistant - Device</h2>
+        </section>
+        <section id="state"></section>
+      </section>
+      <div id="content">
+        <div id="sidebar">
+          <!-- Device -->
+          <nav class="menu">
+            <input type="checkbox" id="device-tab" checked class="menu-action">
+            <label for="device-tab" class="nav-toggle">&#9776;&nbsp;&nbsp;Device</label>
+            
+            <div class="content-menu">
+              <!-- Device -->
+              <hr>
+
+              <div class="device-show" id="device-id_0">
+                <div class="device-name"><button class="view-item device-name">Device name 1</button></div>
+                <div class="device-content">
+                  <div class="device-type">Type<span class="device_type">Sensors</span></div>
+                  <div class="device-sensors">
+                    <div class="device-sensor-temp_value">Temp<span class="temp_value">23C</span></div>
+                    <div class="device-sensor-humid_value">Humid<span class="humid_value">58Rh</span></div>
+                    <div class="device-sensor-sensor_value">Soil/Water<span class="sensor_value">22C</span></div>
+                  </div>
+                </div>
+              </div>
+              
+              <hr>
+              <div class="input-group submenu">
+                <!-- <button id="devices-settings">Settings</button> -->
+                <button id="device-config">Config</button>
+                <!-- <label for="timezoneName">Time zone</label>
+                <input id="timezoneName" length=64 placeholder="Time zone string"> -->
+              </div>
+
+            </div>
+          </nav>
+          <!-- reboot -->
+          <nav class="menu">
+            <div class="content-menu">
+              <div class="center">
+                <button id="reboot">Reboot</button>
+              </div>
+            </div>
+          </nav>
+        </div>
+        <div id="main-content" class="hidden">
+          <h2>HoME Assistant - devices</h2>
+        </div>
+      </div>
+      <!-- footer -->
+      <section id="footer">
+        <div class="info-group center">
+          <label>HoME Assistant</label>
+          <div class="info">Devices</div>
+        </div>
+        <div class="info-group center">
+          <label for="up_time">Up time</label>
+          <div id="up_time" class="info">&nbsp;</div>
+        </div>
+        <div class="info-group center">
+          <label for="wifi_rssi">Signal Strength</label>
+          <div id="wifi_rssi" class="info">&nbsp;</div>
+        </div>
+        <div class="info-group center">
+          <label for="free_heap">Free memory</label>
+          <div id="free_heap" class="info">&nbsp;</div>
+        </div>
+        <div class="info-group center">
+          <label for="version">Version</label>
+          <div id="version" class="info">0.1</div>
+        </div>
+      </section>
+    </section>
+    <script>
+      document.addEventListener("DOMContentLoaded", function (event) {
+        var baseHost = document.location.origin;
+        
+        function selectElement(id, value) {
+          let element = document.getElementById(id);
+          element.value = value;
+        }
+        const rebootButton = document.getElementById("reboot");
+        rebootButton.onclick = () => {
+          if (!confirm("Are you sure you want to restart board!")) {
+            return false;
+          }
+          websocket.send("reboot");
+          setTimeout(function () {
+            location.reload(true);
+          }, 5000);
+        };
+        
+        function handleErrors(response) {
+          if (!response.ok) {
+            alert(response.statusText);
+          }
+          return response;
+        }
+        function set_selected(id, val)
+        {
+          const $select = document.querySelector("#"+id);
+          const $options = Array.from($select.options);
+          const optionToSelect = $options.find(item => item.value === val);
+          optionToSelect.selected = true;
+        }
+        const updateValue = (id, value) => {
+          // console.log(id, value);
+          var el = document.getElementById(id);
+          if (id === "main") {
+          } else if (id === "devices") {
+            console.log(id, value);
+          } else if (id === "timezone") {
+            set_selected(id, value);
+            var timezoneName = document.getElementById("timezoneName");
+            var timezoneValue = document.getElementById("timezone");
+            var selectedText = timezoneValue.options[timezoneValue.selectedIndex].text;
+            timezoneName.value = selectedText;
+          } else if (id === "wifi-cc" || id === "wifi-mode") {
+            set_selected(id, value);
+          } else if (el?.type === "checkbox") {
+            value = value === "1" ? true : false;
+            el.checked = value;
+          } else if (el?.type === "text" || el?.type === "number" || el?.type === "password") {
+            el.value = value;
+          } else {
+            el.innerHTML = value;
+          }
+        };
+        function updateConfig(el) {
+          let value;
+          switch (el.type) {
+            case "checkbox":
+              value = el.checked ? 1 : 0;
+              break;
+            default:
+              value = el.value;
+              break;
+          }
+          var query = `${el.id}=${value}`;
+          // console.log(query);
+          websocket.send(query);
+
+          if (el.id === "timezone")
+          {
+            // console.log("timezone", value);
+            var textName = document.getElementById("timezoneName");
+            var selectedText = el.options[el.selectedIndex].text;
+            textName.value = selectedText;
+          }
+        }
+        document.querySelectorAll(".action").forEach((el) => {
+          el.onchange = () => updateConfig(el);
+        });
+
+        var gateway = `ws://${window.location.hostname}/ws`;
+        var websocket;
+        var ws_timer = null;
+        window.addEventListener("load", onload);
+        
+        function onload(event) {
+          initWebSocket();
+          
+          $(".menu-action").each(function () {
+            this.addEventListener("click", function (e) {
+              var clickedID = $(this).prop("id");
+              $(".menu-action").each(function () {
+                if (clickedID != $(this).prop("id")) this.checked = false;
+              });
+            });
+          });
+          $(".submenu-action").each(function () {
+            this.addEventListener("click", function (e) {
+              var clickedID = $(this).prop("id");
+              $(".submenu-action").each(function () {
+                if (clickedID != $(this).prop("id")) this.checked = false;
+              });
+            });
+          });
+        }
+        function getValues() {
+          websocket.send("devices");
+        }
+        function initWebSocket() {
+          console.log("Trying to open a WebSocket connection");
+          websocket = new WebSocket(gateway);
+          websocket.onopen = onOpen;
+          websocket.onclose = onClose;
+          websocket.onmessage = onMessage;
+        }
+        function onOpen(event) {
+          console.log("Connection opened");
+          if (ws_timer == null) setTimeout(getValues, 500);
+        }
+        function onClose(event) {
+          console.log("Connection closed");
+          setTimeout(initWebSocket, 5000);
+        }
+        function onMessage(event) {
+          var dataObj = JSON.parse(event.data);
+          var keys = Object.keys(dataObj);
+          for (var i = 0; i < keys.length; i++) {
+            var key = keys[i];
+            
+            if (key === "main") {}
+            else if (key === "devices") {
+              // console.log("MAIN", key, dataObj[key]);
+              updateValue(key, dataObj[key]);
+            }
+            else {
+              // console.log("ALL", key, dataObj[key]);
+              updateValue(key, dataObj[key]);
+            }
+          }
+        }
+      });
+    </script>
+  </body>
+</html>

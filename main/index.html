@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controller WebSocket Test Client</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .section { margin-bottom: 20px; }
+        .log { border: 1px solid #ccc; padding: 10px; height: 200px; overflow-y: auto; }
+        .peer-list, .blacklist { border: 1px solid #ccc; padding: 10px; }
+        button { margin: 5px; }
+    </style>
+</head>
+<body>
+    <div class="section">
+        <h2>General Control (/ws)</h2>
+        <button onclick="connectGeneral()">Connect to /ws</button>
+        <button onclick="sendGeneralMessage()">Send Test Message</button>
+        <button onclick="startPeering()">Start Peering</button>
+        <button onclick="disconnectGeneral()">Disconnect /ws</button>
+        <div id="general-log" class="log"></div>
+    </div>
+
+    <div class="section">
+        <h2>Peer Management (/ws/nodes)</h2>
+        <button onclick="connectNodes()">Connect to /ws/nodes</button>
+        <button onclick="disconnectNodes()">Disconnect /ws/nodes</button>
+        <div id="nodes-log" class="log"></div>
+        <div id="found-peers"></div>
+        <div id="peer-list" class="peer-list"></div>
+    </div>
+
+    <div class="section">
+        <h2>Peer Settings and Blacklist (/ws/peers)</h2>
+        <button onclick="connectPeers()">Connect to /ws/peers</button>
+        <button onclick="disconnectPeers()">Disconnect /ws/peers</button>
+        <div id="peers-log" class="log"></div>
+        <div id="peer-settings"></div>
+        <div id="blacklist" class="blacklist">
+            <h3>Blacklisted Peers</h3>
+            <div id="blacklist-content"></div>
+        </div>
+    </div>
+
+    <script>
+        let wsGeneral = null;
+        let wsNodes = null;
+        let wsPeers = null;
+
+        function log(elementId, message) {
+            const logDiv = document.getElementById(elementId);
+            logDiv.innerHTML += `<p>${new Date().toLocaleTimeString()}: ${message}</p>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function connectGeneral() {
+            if (wsGeneral) {
+                log('general-log', 'Already connected to /ws');
+                return;
+            }
+            wsGeneral = new WebSocket(`ws://${window.location.hostname}/ws`);
+            wsGeneral.onopen = () => log('general-log', 'Connected to /ws');
+            wsGeneral.onmessage = (event) => handleGeneralMessage(event.data);
+            wsGeneral.onclose = () => {
+                log('general-log', 'Disconnected from /ws');
+                wsGeneral = null;
+            };
+            wsGeneral.onerror = (error) => log('general-log', `Error: ${error}`);
+        }
+
+        function sendGeneralMessage() {
+            if (!wsGeneral) {
+                log('general-log', 'Not connected to /ws');
+                return;
+            }
+            const msg = { event: "test", data: "Hello from /ws" };
+            wsGeneral.send(JSON.stringify(msg));
+            log('general-log', 'Sent test message to /ws');
+        }
+
+        function startPeering() {
+            if (!wsGeneral) {
+                log('general-log', 'Not connected to /ws');
+                return;
+            }
+            const msg = { event: "start_peering" };
+            wsGeneral.send(JSON.stringify(msg));
+            log('general-log', 'Sent: start_peering');
+        }
+
+        function handleGeneralMessage(data) {
+            const msg = JSON.parse(data);
+            log('general-log', `Received: ${data}`);
+            if (msg.event === "peering_started") {
+                log('general-log', 'Peering started, connect to /ws/nodes');
+            }
+        }
+
+        function disconnectGeneral() {
+            if (wsGeneral) wsGeneral.close();
+        }
+
+        function connectNodes() {
+            if (wsNodes) {
+                log('nodes-log', 'Already connected to /ws/nodes');
+                return;
+            }
+            wsNodes = new WebSocket(`ws://${window.location.hostname}/ws/nodes`);
+            wsNodes.onopen = () => log('nodes-log', 'Connected to /ws/nodes');
+            wsNodes.onmessage = (event) => handleNodesMessage(event.data);
+            wsNodes.onclose = () => {
+                log('nodes-log', 'Disconnected from /ws/nodes');
+                wsNodes = null;
+            };
+            wsNodes.onerror = (error) => log('nodes-log', `Error: ${error}`);
+        }
+
+        function handleNodesMessage(data) {
+            const msg = JSON.parse(data);
+            log('nodes-log', `Received: ${data}`);
+            if (msg.event === "found_peers") {
+                const foundDiv = document.getElementById('found-peers');
+                foundDiv.innerHTML = '<h3>Found Peers</h3>';
+                msg.peers.forEach(peer => {
+                    let typeStr = peer.type === 0 ? "Sensor" : peer.type === 1 ? "Relay" : peer.type === 2 ? "Switch" : "Unknown";
+                    if (peer.type === 0) {
+                        typeStr += ` (${peer.subtype === 0 ? "Temperature" : peer.subtype === 1 ? "Humidity" : peer.subtype === 2 ? "Light" : "Unknown"})`;
+                    }
+                    foundDiv.innerHTML += `<p>${peer.name} (${peer.mac}) - ${typeStr} 
+                        <button onclick="acceptPeer('${peer.mac}')">Accept</button>
+                        <button onclick="rejectPeer('${peer.mac}')">Reject</button></p>`;
+                });
+            } else if (msg.event === "peer_rejected") {
+                updateFoundPeers(msg.mac);
+            } else if (msg.peers) {
+                updatePeerList(msg.peers);
+            }
+        }
+
+        function acceptPeer(mac) {
+            if (!wsNodes) {
+                log('nodes-log', 'Not connected to /ws/nodes');
+                return;
+            }
+            const msg = { event: "accept_peer", mac: mac };
+            wsNodes.send(JSON.stringify(msg));
+            log('nodes-log', `Sent: ${JSON.stringify(msg)}`);
+        }
+
+        function rejectPeer(mac) {
+            if (!wsNodes) {
+                log('nodes-log', 'Not connected to /ws/nodes');
+                return;
+            }
+            const msg = { event: "reject_peer", mac: mac };
+            wsNodes.send(JSON.stringify(msg));
+            log('nodes-log', `Sent: ${JSON.stringify(msg)}`);
+        }
+
+        function updateFoundPeers(rejectedMac) {
+            const foundDiv = document.getElementById('found-peers');
+            const peers = foundDiv.getElementsByTagName('p');
+            for (let i = 0; i < peers.length; i++) {
+                if (peers[i].textContent.includes(rejectedMac)) {
+                    peers[i].remove();
+                    break;
+                }
+            }
+            updateBlacklist();
+        }
+
+        function updatePeerList(peers) {
+            const peerList = document.getElementById('peer-list');
+            peerList.innerHTML = '<h3>Connected Peers</h3>';
+            peers.forEach(peer => {
+                const status = peer.active ? 'Active' : 'Inactive';
+                const data = `Sensors: [${peer.data.sensor_0}, ${peer.data.sensor_1}, ${peer.data.sensor_2}], Relay: ${peer.data.relay}, Switch: ${peer.data.switch}`;
+                peerList.innerHTML += `<p>${peer.name} (${peer.mac}) - ${status} - Last Update: ${peer.last_update} - ${data}</p>`;
+            });
+        }
+
+        function disconnectNodes() {
+            if (wsNodes) wsNodes.close();
+        }
+
+        function connectPeers() {
+            if (wsPeers) {
+                log('peers-log', 'Already connected to /ws/peers');
+                return;
+            }
+            wsPeers = new WebSocket(`ws://${window.location.hostname}/ws/peers`);
+            wsPeers.onopen = () => {
+                log('peers-log', 'Connected to /ws/peers');
+                updateBlacklist();
+            };
+            wsPeers.onmessage = (event) => handlePeersMessage(event.data);
+            wsPeers.onclose = () => {
+                log('peers-log', 'Disconnected from /ws/peers');
+                wsPeers = null;
+            };
+            wsPeers.onerror = (error) => log('peers-log', `Error: ${error}`);
+        }
+
+        function handlePeersMessage(data) {
+            const msg = JSON.parse(data);
+            log('peers-log', `Received: ${data}`);
+            if (msg.peer) {
+                updatePeerSettings(msg.peer);
+            } else if (msg.event === "blacklist_update") {
+                updateBlacklistContent(msg.blacklist);
+            }
+        }
+
+        function updatePeerSettings(peer) {
+            const settingsDiv = document.getElementById('peer-settings');
+            const id = peer.mac.replace(/:/g, '');
+            let html = `<div id="peer-${id}">
+                <h3>${peer.name} (${peer.mac})</h3>
+                <input type="text" id="name-${id}" value="${peer.name}" placeholder="Peer Name" />
+                <input type="number" id="interval-${id}" value="${peer.data_interval_sec || 60}" min="1" max="255" />
+                <button onclick="savePeerSettings('${peer.mac}', 'peer-${id}')">Save</button>
+            </div>`;
+            let existing = document.getElementById(`peer-${id}`);
+            if (existing) existing.outerHTML = html;
+            else settingsDiv.innerHTML += html;
+        }
+
+        function savePeerSettings(mac, divId) {
+            const name = document.getElementById(`name-${divId}`).value;
+            const interval = parseInt(document.getElementById(`interval-${divId}`).value);
+            const msg = { event: "edit_peer", mac: mac, name: name, interval: interval };
+            wsPeers.send(JSON.stringify(msg));
+            log('peers-log', `Sent: ${JSON.stringify(msg)}`);
+        }
+
+        function updateBlacklist() {
+            if (!wsPeers) {
+                log('peers-log', 'Not connected to /ws/peers');
+                return;
+            }
+            const msg = { event: "get_blacklist" };
+            wsPeers.send(JSON.stringify(msg));
+            log('peers-log', 'Sent: get_blacklist');
+        }
+
+        function updateBlacklistContent(blacklist) {
+            const blacklistDiv = document.getElementById('blacklist-content');
+            blacklistDiv.innerHTML = '';
+            blacklist.forEach(mac => {
+                blacklistDiv.innerHTML += `<p>${mac} <button onclick="removeFromBlacklist('${mac}')">Remove</button></p>`;
+            });
+        }
+
+        function removeFromBlacklist(mac) {
+            if (!wsPeers) {
+                log('peers-log', 'Not connected to /ws/peers');
+                return;
+            }
+            const msg = { event: "remove_from_blacklist", mac: mac };
+            wsPeers.send(JSON.stringify(msg));
+            log('peers-log', `Sent: ${JSON.stringify(msg)}`);
+        }
+
+        function disconnectPeers() {
+            if (wsPeers) wsPeers.close();
+        }
+    </script>
+</body>
+</html>

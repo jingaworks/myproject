@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>HoME Assistant</title>
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <script>
+    var script = document.createElement('script');
+    if (window.location.hostname === "192.168.4.1") {
+      script.src = 'jquery.js';
+    } else {
+      script.src = 'https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js';
+    }
+    document.head.appendChild(script);
+  </script>
+  <link rel='stylesheet' href='main.css'>
+</head>
+
+<body>
+  <section id="main">
+    <section id="header">
+      <section id="title">
+        <h2>HoME Assistant - Devices</h2>
+      </section>
+      <section id="state">
+        <div id="b_time" class="board-time">12:30:25 - </div>
+        <!-- <a href="./logs/" target="_blank"><button class="btn-green">Logs</button></a> -->
+        <a href="./info/" target="_blank"><button class="btn-blue">Info</button></a>
+        <!-- <a href="./charts/" target="_blank"><button class="btn-default">Charts</button></a> -->
+      </section>
+    </section>
+    <div id="content">
+      <div id="sidebar">
+
+        <!-- Devices -->
+        <nav class="menu">
+          <div class="content-menu">
+            <div class="devices-list">
+              <div id="devices-list" class="devices-items"></div>
+            </div>
+          </div>
+        </nav>
+
+        <!-- Settings -->
+        <nav class="menu">
+          <input type="checkbox" id="settings-tab" class="menu-action">
+          <label for="settings-tab" class="nav-toggle">&#9776;&nbsp;&nbsp;Settings</label>
+
+          <div class="content-menu">
+
+            <br>
+            <hr><br>
+            <div class="subheader">LOG settings</div>
+            <br>
+
+            <!-- LOG settings -->
+            <br>
+            <!-- <div class="h2" style="font-weight: bold; text-ald -->
+
+            <!-- use log -->
+            <div class="input-group submenu">
+              <label for="log-use_log">Use LOG</label>
+              <div class="switch" style="align-items: center;">
+                <input id="log-use_log" type="checkbox" class="action">
+                <label class="slider" for="log-use_log"></label>
+              </div>
+            </div>
+            <!-- log interval -->
+            <div class="input-group submenu">
+              <label for="log-interval">LOG interval (minutes)</label>
+              <input type="number" id="log-interval" min="1" max="30" placeholder="log interval" class="action">
+            </div>
+
+            <!-- use log -->
+            <div class="input-group submenu">
+              <label for="log-remove_logs">Remove LOG data with device?</label>
+              <div class="switch" style="align-items: center;">
+                <input id="log-remove_logs" type="checkbox" class="action">
+                <label class="slider" for="log-remove_logs"></label>
+              </div>
+            </div>
+
+            <br>
+            <hr><br>
+            <div class="subheader">Network settings</div>
+            <br>
+
+            <!-- WIFI mode -->
+            <div class="input-group submenu">
+              <label for="wifi-mode">WIFI Mode</label>
+              <select id="wifi-mode" class="action">
+                <option value="0">Select</option>
+                <option value="1">Router</option>
+                <option value="2">Access Point</option>
+                <option value="3">AP/Router</option>
+              </select>
+            </div>
+            <!-- WIFI contry code -->
+            <div class="input-group submenu">
+              <label for="wifi-cc">Country Code</label>
+              <select id="wifi-cc" class="action">
+                <option value="0">Safe region</option>
+                <option value="1">AT</option>
+                <option value="2">AU</option>
+                <option value="3">BE</option>
+                <option value="4">BG</option>
+                <option value="5">BR</option>
+                <option value="6">CA</option>
+                <option value="7">CH</option>
+                <option value="8">CN</option>
+                <option value="9">CY</option>
+                <option value="10">CZ</option>
+                <option value="11">DE</option>
+                <option value="12">DK</option>
+                <option value="13">EE</option>
+                <option value="14">ES</option>
+                <option value="15">FI</option>
+                <option value="16">FR</option>
+                <option value="17">GB</option>
+                <option value="18">GR</option>
+                <option value="19">HK</option>
+                <option value="20">HR</option>
+                <option value="21">HU</option>
+                <option value="22">IE</option>
+                <option value="23">IN</option>
+                <option value="24">IS</option>
+                <option value="25">IT</option>
+                <option value="26">JP</option>
+                <option value="27">KR</option>
+                <option value="28">LI</option>
+                <option value="29">LT</option>
+                <option value="30">LU</option>
+                <option value="31">LV</option>
+                <option value="32">MT</option>
+                <option value="33">MX</option>
+                <option value="34">NL</option>
+                <option value="35">NO</option>
+                <option value="36">NZ</option>
+                <option value="37">PL</option>
+                <option value="38">PT</option>
+                <option value="39">RO</option>
+                <option value="40">SE</option>
+                <option value="41">SI</option>
+                <option value="42">SK</option>
+                <option value="43">TW</option>
+                <option value="44">US</option>
+
+                <!--  "AT","AU","BE","BG","BR",CA","CH","CN","CY","CZ","DE","DK","EE","ES","FI","FR","GB","GR","HK","HR","HU","IE","IN","IS","IT","JP","KR","LI","LT","LU","LV","MT","MX","NL","NO","NZ","PL","PT","RO","SE","SI","SK","TW","US" -->
+              </select>
+            </div>
+
+            <div id="wifi_ap_mode" class="hidden">
+
+              <!-- AP settings -->
+              <br>
+              <div class="h2" style="font-weight: bold; text-align: center;">AP Credentials</div>
+              <hr style="width: 70%; text-align: center;">
+
+              <!-- ap ssid -->
+              <div class="input-group submenu" style="margin-top: 20px;">
+                <label for="wifi-ap_ssid">AP name</label>
+                <input id="wifi-ap_ssid" maxlength="16" placeholder="AP name" class="action">
+              </div>
+              <!-- ap pass -->
+              <div class="input-group submenu">
+                <label for="wifi-ap_pass">AP pass</label>
+                <input type="password" id="wifi-ap_pass" maxlength="32" placeholder="AP password" class="action">
+              </div>
+              <!-- ap channel -->
+              <div class="input-group submenu">
+                <label for="wifi-ap_channel">AP channel</label>
+                <input type="number" id="wifi-ap_channel" maxlength="32" placeholder="AP Channel" class="action">
+              </div>
+
+            </div>
+            <div id="wifi_sta_mode" class="hidden">
+
+              <!-- STA/Router settings -->
+              <br>
+              <div class="h2" style="font-weight: bold; text-align: center;">Router Credentials</div>
+              <hr style="width: 70%; text-align: center;">
+
+              <!-- sta ssid -->
+              <div class="input-group submenu" style="margin-top: 20px;">
+                <label for="wifi-sta_ssid">SSID</label>
+                <input id="wifi-sta_ssid" maxlength="32" length="32" placeholder="SSID" class="action">
+              </div>
+              <!-- sta pass -->
+              <div class="input-group submenu">
+                <label for="wifi-sta_pass">Password</label>
+                <input type="password" id="wifi-sta_pass" maxlength="32" length="32" placeholder="Password"
+                  class="action">
+              </div>
+              <!-- sta ip -->
+              <div class="input-group submenu">
+                <label for="wifi-sta_ip">IP address</label>
+                <input type="text" id="wifi-sta_ip" disabled>
+              </div>
+              <!-- sta channel -->
+              <div class="input-group submenu">
+                <label for="wifi-sta_channel">WIFI channel</label>
+                <input type="number" id="wifi-sta_channel" disabled>
+              </div>
+              <!-- sta internet -->
+              <div class="input-group submenu">
+                <label for="wifi-sta_internet">Internet</label>
+                <div class="switch" style="align-items: center;">
+                  <input id="wifi-sta_internet" type="checkbox" class="action">
+                  <label class="slider" for="wifi-sta_internet"></label>
+                </div>
+              </div>
+
+            </div>
+
+            <br>
+            <hr><br>
+            <div class="subheader">Clock settings</div>
+            <br>
+
+            <div class="input-group submenu" id="time-group">
+              <label for="timezoneName">Time zone</label>
+              <input id="timezoneName" length=64 placeholder="Time zone string">
+            </div>
+            <div class="input-group submenu" id="time-group">
+              <label for="rtc-timezone">Time zone</label>
+              <select id="rtc-timezone" class="action">
+                <option value="" selected>&nbsp;-- Select --</option>
+                <option value="EET-2EEST-3,M3.5.0/03:00:00,M10.5.0/04:00:00">Europe/Athens</option>
+                <option value="GMT0BST,M3.5.0/1,M10.5.0">Europe/Belfast</option>
+                <option value="CET-1CEST,M3.5.0,M10.5.0/3">Europe/Berlin</option>
+                <option value="GMT0BST,M3.5.0/1,M10.5.0">Europe/London</option>
+                <option value="CET-1CEST,M3.5.0,M10.5.0/3">Europe/Paris</option>
+                <option value="CET-1CEST,M3.5.0,M10.5.0/3">Europe/Rome</option>
+                <option value="CET-1CEST,M3.5.0,M10.5.0/3">Europe/Zurich</option>
+                <option value="<-12>12">GMT-12:00</option>
+                <option value="<-11>11">GMT-11:00</option>
+                <option value="<-10>10">GMT-10:00</option>
+                <option value="<-09>9">GMT-9:00</option>
+                <option value="<-08>8">GMT-8:00</option>
+                <option value="<-07>7">GMT-7:00</option>
+                <option value="<-06>6">GMT-6:00</option>
+                <option value="<-05>5">GMT-5:00</option>
+                <option value="<-04>4">GMT-4:00</option>
+                <option value="<-03>3">GMT-3:00</option>
+                <option value="<-02>2">GMT-2:00</option>
+                <option value="<-01>1">GMT-1:00</option>
+                <option value="GMT0">GMT+0:00</option>
+                <option value="<+01>-1">GMT+1:00</option>
+                <option value="<+02>-2">GMT+2:00</option>
+                <option value="<+03>-3">GMT+3:00</option>
+                <option value="<+04>-4">GMT+4:00</option>
+                <option value="<+05>-5">GMT+5:00</option>
+                <option value="<+06>-6">GMT+6:00</option>
+                <option value="<+07>-7">GMT+7:00</option>
+                <option value="<+08>-8">GMT+8:00</option>
+                <option value="<+09>-9">GMT+9:00</option>
+                <option value="<+10>-10">GMT+10:00</option>
+                <option value="<+11>-11">GMT+11:00</option>
+                <option value="<+12>-12">GMT+12:00</option>
+              </select>
+            </div>
+
+          </div>
+        </nav>
+
+        <!-- reboot -->
+        <nav class="menu">
+          <div class="content-menu">
+            <div class="center">
+              <button id="reboot">Reboot</button>
+              <button id="new_peer">New Peer</button>
+              <button id="clear_peers">Clear All Peers</button>
+              <button id="send_channel">send channel</button>
+            </div>
+          </div>
+        </nav>
+
+      </div> <!--sidebar-->
+
+      <div id="main-content" class="hidden">
+        <h2>HoME Assistant - devices</h2>
+      </div>
+    </div>
+    <!-- footer -->
+    <section id="footer">
+      <div class="info-group center">
+        <label>HoME Assistant</label>
+        <div class="info">Devices</div>
+      </div>
+      <div class="info-group center">
+        <label for="up_time">Up time</label>
+        <div id="up_time" class="info">&nbsp;</div>
+      </div>
+      <div class="info-group center">
+        <label for="wifi_rssi">Signal Strength</label>
+        <div id="wifi_rssi" class="info">&nbsp;</div>
+      </div>
+      <div class="info-group center">
+        <label for="free_heap">Free memory</label>
+        <div id="free_heap" class="info">&nbsp;</div>
+      </div>
+      <div class="info-group center">
+        <label for="version">Version</label>
+        <div id="version" class="info">0.1</div>
+      </div>
+    </section>
+  </section>
+  <script>
+    var page_source = 0;
+    if (window.location.hostname === "192.168.4.1") {
+      page_source = 1;
+    } else {
+      page_source = 2;
+    }
+  </script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function (event) {
+
+      console.log("page_source", page_source);
+
+      var baseHost = document.location.origin;
+      console.log("baseHost", baseHost);
+
+      function setDevices(devices) {
+
+        const devices_container = document.getElementById("devices-list");
+
+        const device_template = document.getElementById("device-tpl");
+        devices_container.innerHTML = "";
+
+        var keys = Object.keys(devices);
+        for (var i = 0; i < keys.length; i++) {
+          const node_element = device_template.content.cloneNode(true);
+          var key = keys[i];
+          let node_div = node_element.querySelector(".device-item");
+          node_div.id = `device_id-${devices[key].id}`;
+
+
+          let node_name = node_div.querySelector(".node-name");
+          node_name.innerHTML = `${devices[key].name}`
+          node_name.href = `/${devices[key].mac_id}/`;
+          if (devices[key].status == 0) {
+            node_name.style.color = 'red';
+          }
+
+          if (devices[key].type < 3) {
+            let device_content = node_div.querySelector(".device-content");
+
+            let sensor_type = document.createElement("div");
+            sensor_type.classList.add("device-type");
+            sensor_type.innerHTML = `Type <span class="device_type">${devices[key].type}</span>`;
+
+            device_content.appendChild(sensor_type);
+
+            let device_sensors = document.createElement("div");
+            device_sensors.classList.add("device-sensors");
+
+            var index = Object.keys(devices[key].sensor);
+            for (var x = 0; x < index.length; x++) {
+
+              let sensor_data = document.createElement("div");
+              let sensor_id = "";
+              let class_name = "";
+
+              switch (x) {
+
+                case 0:
+                  {
+                    sensor_id = `temp-${devices[key].id}`;
+                    class_name = "temp_value";
+                    break;
+                  }
+                case 1:
+                  {
+                    sensor_id = `humid-${devices[key].id}`;
+                    class_name = "humid_value";
+                    break;
+                  }
+                case 2:
+                  {
+                    sensor_id = `sensor-${devices[key].id}`;
+                    class_name = "sensor_value";
+                    break;
+                  }
+
+                default:
+                  break;
+              }
+
+              sensor_data.classList.add("device-sensor-sensor_value");
+              sensor_data.innerHTML = `${devices[key].sensor[x].name}<span id="${sensor_id}" class="${class_name}">${devices[key].sensor[x].value}</span>`;
+
+              device_sensors.appendChild(sensor_data);
+              device_content.appendChild(device_sensors);
+            }
+          }
+
+          let btn_div = node_div.querySelector(".device-buttons");
+
+          let remove_nod_button = document.createElement("button");
+          remove_nod_button.id = `peer_id-${devices[key].id}`;
+          remove_nod_button.classList.add("device-remove");
+          remove_nod_button.innerHTML = "remove";
+          btn_div.appendChild(remove_nod_button);
+
+          let link_nod_button = document.createElement("button");
+          if (devices[key].wifi_mode == 1 || devices[key].wifi_mode == 3) {
+            link_nod_button.id = `peer_link-${devices[key].ip_addr}`;
+            link_nod_button.classList.add("device-link");
+            link_nod_button.innerHTML = "open";
+          }
+          else {
+            link_nod_button.innerHTML = "AP Mode";
+          }
+          btn_div.appendChild(link_nod_button);
+
+          devices_container.appendChild(node_element);
+        }
+
+        document.querySelectorAll(".device-remove").forEach((el) => {
+          el.onclick = () => {
+            if (!confirm("remove device?")) {
+              return false;
+            }
+            removePeer(el);
+          }
+        });
+        document.querySelectorAll(".device-link").forEach((el) => {
+          el.onclick = () => {
+            openPeerLink(el);
+          }
+        });
+      }
+
+      function openPeerLink(el) {
+        let link = el.id.split('-')[1];
+        let url = `http://${link}`
+        window.open(url, "_blank");
+      }
+
+      function updateDevices(devices) {
+
+        var keys = Object.keys(devices);
+
+        for (var i = 0; i < keys.length; i++) {
+          var key = keys[i];
+
+          var cnt_id = `device_id-${devices[key].id}`;
+          var cnt = document.getElementById(cnt_id);
+
+          if (cnt == null) continue;
+
+          let cnt_buttons = cnt.querySelector(".device-buttons");
+          let link_btn = cnt_buttons.children[1];
+          if (devices[key].ip_addr != undefined && devices[key].wifi_mode != undefined) {
+            if (devices[key].wifi_mode == 1 || devices[key].wifi_mode == 3) {
+              link_btn.id = `peer_link-${devices[key].ip_addr}`;
+              link_btn.classList.add("device-link");
+              link_btn.innerHTML = "open";
+            }
+            else {
+              link_btn.removeAttribute("id");
+              link_btn.removeAttribute("class");
+              link_btn.innerHTML = "AP Mode";
+            }
+          }
+
+          if (devices[key].status == 0) {
+            cnt.firstElementChild.firstElementChild.style.color = 'red';
+          }
+          else {
+            cnt.firstElementChild.firstElementChild.removeAttribute('style');
+          }
+
+          var index = Object.keys(devices[key].sensor);
+          for (var x = 0; x < index.length; x++) {
+            let sensor_id = "";
+
+            switch (x) {
+
+              case 0:
+                {
+                  sensor_id = `temp-${devices[key].id}`;
+                  class_name = "temp_value";
+                  break;
+                }
+              case 1:
+                {
+
+                  sensor_id = `humid-${devices[key].id}`;
+                  class_name = "humid_value";
+                  break;
+                }
+              case 2:
+                {
+                  sensor_id = `sensor-${devices[key].id}`;
+                  class_name = "sensor_value";
+                  break;
+                }
+
+              default:
+                break;
+            }
+            var sensor_element = document.getElementById(sensor_id);
+            if (sensor_element == null) continue;
+
+            sensor_element.innerHTML = devices[key].sensor[x].value;
+          }
+        }
+        document.querySelectorAll(".device-link").forEach((el) => {
+          el.onclick = () => {
+            openPeerLink(el);
+          }
+        });
+      }
+
+      function selectElement(id, value) {
+        let element = document.getElementById(id);
+        element.value = value;
+      }
+
+      const rebootButton = document.getElementById("reboot");
+      rebootButton.onclick = () => {
+        if (!confirm("Are you sure you want to restart board!")) {
+          return false;
+        }
+        websocket.send("reboot");
+        setTimeout(function () {
+          location.reload(true);
+        }, 5000);
+      };
+      const peeringButton = document.getElementById("new_peer");
+      peeringButton.onclick = () => {
+        if (!confirm("Add new peer?")) {
+          return false;
+        }
+        websocket.send("new_peer");
+        // setTimeout(function () {
+        //   location.reload(true);
+        // }, 2000);
+      };
+      const clearPeersButton = document.getElementById("clear_peers");
+      clearPeersButton.onclick = () => {
+        if (!confirm("Clear All peers?")) {
+          return false;
+        }
+        websocket.send("clear_peers");
+        setTimeout(function () {
+          location.reload(true);
+        }, 5000);
+      };
+      const channelButton = document.getElementById("send_channel");
+      channelButton.onclick = () => {
+        if (!confirm("send_channel?")) {
+          return false;
+        }
+        websocket.send("send_channel");
+      };
+
+
+      function handleErrors(response) {
+        if (!response.ok) {
+          alert(response.statusText);
+        }
+        return response;
+      }
+      function change_wifi_mode(value) {
+        var ap = document.getElementById("wifi_ap_mode");
+        var sta = document.getElementById("wifi_sta_mode");
+        ap.classList.add("hidden");
+        sta.classList.add("hidden");
+        document.getElementById("wifi-ap_channel").setAttribute("disabled", true);
+        if (value == 1) {
+          // sta mode
+          sta.classList.remove("hidden");
+        } else if (value == 2) {
+          // ap mode
+          document.getElementById("wifi-ap_channel").removeAttribute("disabled");
+          ap.classList.remove("hidden");
+        } else if (value == 3) {
+          // apsta mode
+          ap.classList.remove("hidden");
+          sta.classList.remove("hidden");
+        }
+      }
+      function set_selected(id, val) {
+        const $select = document.querySelector("#" + id);
+        const $options = Array.from($select.options);
+        const optionToSelect = $options.find(item => item.value === val);
+        optionToSelect.selected = true;
+      }
+      const updateValue = (id, value) => {
+        // console.log(id, value);
+        var el = document.getElementById(id);
+        if (id === "main") {
+        } else if (id === "devices") {
+          setDevices(value);
+        } else if (id === "rtc-timezone") {
+          set_selected(id, value);
+          var timezoneName = document.getElementById("timezoneName");
+          var timezoneValue = document.getElementById("rtc-timezone");
+          var selectedText = timezoneValue.options[timezoneValue.selectedIndex].text;
+          timezoneName.value = selectedText;
+        } else if (id === "wifi-cc" || id === "wifi-mode") {
+          set_selected(id, value);
+          if (id === "wifi-mode") {
+            change_wifi_mode(value);
+          }
+        } else if (el?.type === "checkbox") {
+          value = value === "1" ? true : false;
+          el.checked = value;
+        } else if (el?.type === "text" || el?.type === "number" || el?.type === "password") {
+          el.value = value;
+        } else {
+          el.innerHTML = value;
+        }
+      };
+      function updateConfig(el) {
+        let value;
+
+        switch (el.type) {
+          case "checkbox":
+            value = el.checked ? 1 : 0;
+            break;
+          default:
+            value = el.value;
+            break;
+        }
+        if (el.id == "wifi-mode" && value == 0) return;
+
+        var query = `${el.id}=${value}`;
+        // console.log(query);
+        websocket.send(query);
+
+        if (el.id === "timezonertc-") {
+          // console.log("timezonertc-", value);
+          var textName = document.getElementById("timezoneName");
+          var selectedText = el.options[el.selectedIndex].text;
+          textName.value = selectedText;
+        }
+        if (el.id === "rtc-timezone") {
+          setTimeout(function () {
+            location.reload(true);
+          }, 5000);
+        }
+
+      }
+      document.querySelectorAll(".action").forEach((el) => {
+        el.onchange = () => updateConfig(el);
+      });
+
+      function removePeer(el) {
+        let id = el.id.split('-')[1];
+
+        var device_cnt_id = `device_id-${id}`;
+        var device_cnt = document.getElementById(device_cnt_id);
+        if (device_cnt == null) return;
+
+        device_cnt.remove();
+
+        var query = `remove_device=${id}`;
+        websocket.send(query);
+        setTimeout(function () {
+          location.reload(true);
+        }, 500);
+      }
+
+      var gateway = `ws://${window.location.hostname}/ws`;
+      var websocket;
+      var ws_timer = null;
+      window.addEventListener("load", onload);
+
+      // on load
+      function onload(event) {
+        initWebSocket();
+
+        $(".menu-action").each(function () {
+          this.addEventListener("click", function (e) {
+            var clickedID = $(this).prop("id");
+            $(".menu-action").each(function () {
+              if (clickedID != $(this).prop("id")) this.checked = false;
+            });
+          });
+        });
+        $(".submenu-action").each(function () {
+          this.addEventListener("click", function (e) {
+            var clickedID = $(this).prop("id");
+            $(".submenu-action").each(function () {
+              if (clickedID != $(this).prop("id")) this.checked = false;
+            });
+          });
+        });
+      }
+      // get values
+      function getValues() {
+        websocket.send("devices");
+      }
+      // init websocket
+      function initWebSocket() {
+        console.log("Trying to open a WebSocket connection");
+        websocket = new WebSocket(gateway);
+        websocket.onopen = onOpen;
+        websocket.onclose = onClose;
+        websocket.onmessage = onMessage;
+      }
+      // on open
+      function onOpen(event) {
+        console.log("Connection opened");
+        if (ws_timer == null) setTimeout(getValues, 500);
+      }
+      // on close
+      function onClose(event) {
+        console.log("Connection closed");
+        setTimeout(initWebSocket, 5000);
+      }
+      // on message
+      function onMessage(event) {
+        var dataObj = JSON.parse(event.data);
+        var keys = Object.keys(dataObj);
+        for (var i = 0; i < keys.length; i++) {
+          var key = keys[i];
+
+          // console.log("ALL", key, dataObj[key]);
+          if (key == "b_ip") {
+
+          }
+          else if (key === "main" || key == "new_peer" || key == "b_channel") {
+            // console.log(key);
+          }
+          else if (key == "update_devices") {
+            updateDevices(dataObj[key]);
+          }
+          else if (key === "devices") {
+            // console.log("MAIN", key, dataObj[key]);
+            setDevices(dataObj[key]);
+          }
+          else {
+            updateValue(key, dataObj[key]);
+          }
+        }
+      }
+    });
+  </script>
+  <template id="device-tpl">
+    <div class="device-item">
+      <div class="device-name">
+        <a href="#" target="_blank" class="view-item device-name node-name"></a>
+      </div>
+      <hr style="width: 90%;">
+      <div class="device-content">
+      </div>
+      <div class="device-buttons">
+      </div>
+    </div>
+  </template>
+</body>
+
+</html>

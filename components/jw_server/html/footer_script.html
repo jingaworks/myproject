@@ -1,0 +1,144 @@
+
+<section id="footer">
+  <div class="info-group center">
+    <label>HoME Assistant</label>
+    <div class="info">Local Master</div>
+  </div>
+  <div class="info-group center">
+    <label for="up_time">Up time</label>
+    <div id="up_time" class="info">&nbsp;</div>
+  </div>
+  <div class="info-group center">
+    <label for="wifi_rssi">Signal Strength</label>
+    <div id="wifi_rssi" class="info">&nbsp;</div>
+  </div>
+  <div class="info-group center">
+    <label for="free_heap">Free memory</label>
+    <div id="free_heap" class="info">&nbsp;</div>
+  </div>
+  <div class="info-group center">
+    <label for="version">Version</label>
+    <div id="version" class="info">0.1</div>
+  </div>
+</section>
+<script type="text/javascript">
+  // var currentTime = new Date();
+  // var current_day = currentTime.getDate();
+  // var current_month = currentTime.getMonth() + 1;
+  // var current_year = currentTime.getFullYear();
+
+  // var chart_link = `dht_in_${current_day}_${current_month}_${current_year}.txt`;
+  // var chart_title = "Inside Temp/Humid - Today";
+
+  document.addEventListener("DOMContentLoaded", function (event) {
+
+    var mac_id = document.getElementById("mac_id").innerText;
+    console.log(mac_id);
+    document.getElementById("device_mac_id").innerText = mac_id;
+    
+    var gateway = `ws://${window.location.hostname}/ws`;
+      var websocket;
+      var ws_timer = null;
+      window.addEventListener("load", onload);
+
+      // on load
+      function onload(event) {
+        if (mac_id != "info") initWebSocket();
+      }
+      // get values
+      function getValues() {
+        var mac = `${mac_id}`;
+        websocket.send(mac);
+      }
+      // init websocket
+      function initWebSocket() {
+        console.log("Trying to open a WebSocket connection");
+        websocket = new WebSocket(gateway);
+        websocket.onopen = onOpen;
+        websocket.onclose = onClose;
+        websocket.onmessage = onMessage;
+      }
+      // on open
+      function onOpen(event) {
+        console.log("Connection opened");
+        if (ws_timer == null) setTimeout(getValues, 500);
+      }
+      // on close
+      function onClose(event) {
+        console.log("Connection closed");
+        setTimeout(initWebSocket, 5000);
+      }
+      // on message
+      function onMessage(event) {
+        var dataObj = JSON.parse(event.data);
+        var keys = Object.keys(dataObj);
+        for (var i = 0; i < keys.length; i++) {
+          var key = keys[i];
+
+          // console.log("ALL", key, dataObj[key]);
+          // if (key === "main" || key == "new_peer" || key == "b_ip" || key == "b_channel") { }
+          // else if (key == "update_devices") {
+          //   updateDevices(dataObj[key]);
+          // }
+          // else if (key === "devices") {
+          //   // console.log("MAIN", key, dataObj[key]);
+          //   setDevices(dataObj[key]);
+          // }
+          // else {
+          //   updateValue(key, dataObj[key]);
+          // }
+        }
+      }
+    
+  //   function updateLink(el) {
+  //     chart_link = el.dataset.link;
+  //     const log_name = chart_link.split("_");
+  //     var log_year = '';
+  //     if (log_name[0] == "ds") {
+  //       log_year = log_name[3].split('.');
+  //       chart_title = `DS Temperature ${log_name[1]} ${log_name[2]} ${log_year[0]}`;
+  //     } else {
+  //       log_year = log_name[4].split('.');
+  //       if (log_name[1] == "in") {
+  //         chart_title = `Inside Temp/Humid ${log_name[2]} ${log_name[3]} ${log_year[0]}`;
+  //       } else if (log_name[1] == "out") {
+  //         chart_title = `Outside Temp/Humid ${log_name[2]} ${log_name[3]} ${log_year[0]}`;
+  //       }
+  //     }
+  //     drawChart();
+  //   }
+
+  //   document.querySelectorAll(".chart-link").forEach((el) => {
+  //     el.onclick = () => updateLink(el);
+  //   });
+  });
+
+  // google.charts.load('current', {'packages':['corechart']});
+  // google.charts.setOnLoadCallback(drawChart);
+
+  // function drawChart() {
+  //   var pageHost = document.location.origin;
+  //   $.ajax({
+  //     url: `${pageHost}/logs/${chart_link}`,
+  //     success: function (txt) {
+  //       var dataArray = [['time', 'temp', 'humidity']];
+  //       var txtArray = txt.split('\n');
+  //       for (var i = 0; i < txtArray.length; i++) {
+  //         if (i == 0) continue;
+  //         var tmpData = txtArray[i].split("-");
+  //         var tempData_C = tmpData[1].split("C");
+  //         var tempData_H = tempData_C[1].split("RH");
+  //         dataArray.push([tmpData[0], parseFloat(tempData_C[0]), parseFloat(tempData_H[0])]);
+  //       }
+  //       var data = google.visualization.arrayToDataTable(dataArray);
+  //       var chart = new google.visualization.LineChart(document.querySelector('#curve_chart'));
+  //       chart.draw(data, {
+  //         title: `${chart_title}`,
+  //         curveType: 'function',
+  //         legend: { position: 'bottom' },
+  //       });
+  //     }
+  //  });
+  // }
+  
+</script>
