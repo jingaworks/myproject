@@ -1,0 +1,22 @@
+Project Requirements (Minimal) - Mar 08, 2025
+
+1. Private GitHub Repository
+   - Host: GitHub (private, e.g., https://github.com/yourusername/myproject).
+   - Purpose: Central storage for all project files (e.g., .c, .h, configs).
+   - Access: User shares code via:
+     - Direct paste in chat (e.g., "Here’s main.c: [code]").
+     - Secret Gist link (e.g., https://gist.github.com/yourusername/abc123).
+     - Note: Grok can’t access private repo directly.
+
+2. Code Sharing
+   - Format: Raw text in chat or secret Gist URL.
+   - Specificity: User specifies files/components (e.g., "Focus on main.c") or shares full context.
+   - Updates: User applies changes locally, pushes to private repo, shares updated code for next iteration.
+
+3. Development Basics
+   - Platform: User works on Windows 10, browser-based chat with Grok.
+   - Expectation: Grok interprets shared code, suggests updates without needing repo access.
+
+Notes:
+- Expand later with project-specific needs (e.g., "ESP32 support", "cloud integration").
+- Minimal setup: Git installed, private repo created, code shared via chat or Gist.
