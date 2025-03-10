@@ -31,10 +31,9 @@ void app_main(void) {
     }
     ESP_ERROR_CHECK(ret);
 
-
     ESP_ERROR_CHECK(jw_wifi_init());
     ESP_ERROR_CHECK(jw_rtc_init());
-    ESP_ERROR_CHECK(jw_server_init());
+    ESP_ERROR_CHECK(jw_server_init()); // Interface: sets up server core
     ESP_ERROR_CHECK(jw_sdcard_init());
     ESP_ERROR_CHECK(jw_log_init());
 
@@ -52,9 +51,9 @@ void app_main(void) {
     };
 
     const jw_wifi_server_interface_t server_if = {
-        .server_start = jw_server_start,
-        .server_stop = jw_server_stop,
-        .is_server_running = jw_server_is_running,
+        .server_start = jw_server_start,     // Updated interface function
+        .server_stop = jw_server_stop,       // Updated interface function
+        .is_server_running = jw_server_is_running, // Updated interface function
         .params = &server_params
     };
 
@@ -63,7 +62,7 @@ void app_main(void) {
     jw_wifi_set_server_interface(&server_if);
 
     ESP_ERROR_CHECK(jw_wifi_start());
-    ESP_ERROR_CHECK(jw_server_start(&server_params));
+    ESP_ERROR_CHECK(jw_server_start(&server_params)); // Interface: starts HTTP and WS services
 
     ESP_LOGI(TAG, "Server started successfully");
     ESP_LOGI(TAG, "Application started");
